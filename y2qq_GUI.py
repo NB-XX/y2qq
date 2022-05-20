@@ -86,5 +86,9 @@ try:
                 sg.Popup('配置导入失败，检查配置文件是否存在')
         else:
             sg.Popup(f"未处理未知事件:【{event}】")
+except Exception as e:
+    import traceback
+    err_str = traceback.format_exc()
+    sg.Popup(f"未处理异常:【{err_str}】")
 finally:
     window.close()
