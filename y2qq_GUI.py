@@ -42,7 +42,7 @@ try:
         if event == sg.WIN_CLOSED:
             break
         elif event == '停止推流':
-            y2qq.process.kill()
+            y2qq.stop_restream()
             sg.cprint('推流已经停止')
         elif event == '设置代理':
             if values['port'] == None:
