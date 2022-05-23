@@ -61,10 +61,11 @@ try:
         if event == sg.WIN_CLOSED:
             break
         elif event == '设置代理':
-            if values['port'] == None:
-                sg.Popup('请输入端口数字')
-            else:
+            try:
+                tmp_port = int(values['port'])
                 y2qq.set_proxy(values['port'])
+            except:
+                sg.Popup('请输入端口数字')
         elif event == '获取直播信息':
             # 开启新进程获取直播信息
             window.perform_long_operation(
