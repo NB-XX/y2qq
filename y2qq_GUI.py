@@ -2,7 +2,7 @@ import PySimpleGUI as sg
 import y2qq
 
 format_dic = {
-    '91 - 256x144': '144p', '92 - 426x240': '240p', '93 - 640x360': '360p', '94 - 854x480': '480p', '300 - 1280x720': '720p', '301 - 1920x1080': '1080p'
+    '91': '144p', '92': '240p', '93': '360p', '94': '480p', '95': '720p', '96': '1080p', '300': '720p', '301': '1080p'
 }
 format_list = []
 m3u8 = ''
@@ -117,7 +117,7 @@ try:
                 format_list = []
                 formats = values[event]
                 for i in formats:
-                    format_list.append(format_dic[i['format']])
+                    format_list.append(format_dic[i['format_id']])
                 # 调用字典转化为分辨率并更新到选择列表
                 window['-SELECTOR-'].update(values=format_list)
             except:
