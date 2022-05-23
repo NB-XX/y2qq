@@ -5,6 +5,9 @@ import youtube_dl
 import yaml
 
 
+g_process = None
+
+
 def set_proxy(in_port):
     port = in_port
     os.environ["http_proxy"] = f"http://127.0.0.1:{port}"
@@ -25,9 +28,6 @@ def get_format(in_url):
             sg.cprint('获取直播信息失败，直播可能已经停止')
     except:
         sg.cprint('检查直播链接输入是否正确')
-
-
-g_process = None
 
 
 def restream(m3u8, in_ffmpeg, in_key):
@@ -51,7 +51,6 @@ def stop_restream():
 
 
 def write_yaml(r):
-
     with open('config.yaml', "w", encoding="utf-8") as f:
         yaml.dump(r, f)
 

@@ -6,6 +6,7 @@ format_dic = {
 }
 format_list = []
 m3u8 = ''
+
 sg.theme('DarkAmber')
 # 设置控件属性
 ff_text = sg.Text('设置ffmpeg路径')
