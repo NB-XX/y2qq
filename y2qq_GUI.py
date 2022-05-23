@@ -42,8 +42,20 @@ layout = [
 ]
 
 
+def btn_read_yaml_config(window):
+    # 读取保存的配置并更新到控件
+    try:
+        dic = y2qq.read_yaml('config.yaml')
+        window['ff'].update(dic['ff'])
+        window['port'].update(dic['port'])
+        y2qq.set_proxy(dic['port'])
+    except:
+        pass
+
+
 try:
-    window = sg.Window('QQ频道转播', layout)
+    window = sg.Window('QQ频道转播', layout, finalize=True)
+    btn_read_yaml_config(window)
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED:
@@ -95,14 +107,7 @@ try:
             except:
                 sg.Popup('写入配置失败')
         elif event == 'read_yaml':
-            # 读取保存的配置并更新到控件
-            try:
-                dic = y2qq.read_yaml('config.yaml')
-                window['ff'].update(dic['ff'])
-                window['port'].update(dic['port'])
-                y2qq.set_proxy(dic['port'])
-            except:
-                pass
+            btn_read_yaml_config(window)
         else:
             sg.Popup(f"未处理未知事件:【{event}】")
 except Exception as e:
