@@ -73,6 +73,8 @@ try:
         elif event == '-format-':
             # 获取清晰度参数format
             try:
+                # 每次更新时需要先清空,否则按多次时无限添加
+                format_list = []
                 formats = values[event]
                 for i in formats:
                     format_list.append(format_dic[i['format']])
