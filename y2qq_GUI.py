@@ -43,20 +43,59 @@ layout = [
 ]
 
 
+# ---temp function. Maybe move to outer file for better constuct
 def btn_read_yaml_config(window):
     # 读取保存的配置并更新到控件
     try:
         dic = y2qq.read_yaml('config.yaml')
         window['ff'].update(dic['ff'])
         window['port'].update(dic['port'])
+
+        if dic.get('last_ytb_link'):
+            window['url'].update(dic.get('last_ytb_link'))
+        if dic.get('last_key'):
+            window['key'].update(dic.get('last_key'))
         y2qq.set_proxy(dic['port'])
-    except:
+    except Exception as e:
         pass
 
 
+def btn_save_config_yaml(values, should_pop_up=True):
+    try:
+        # 保存配置字典到当前文件夹
+        dic = {
+            'ff': values['ff'],
+            'port': values['port'],
+            'last_ytb_link': values['url'],
+            'last_key': values['key']
+        }
+        y2qq.write_yaml(dic)
+        if should_pop_up:
+            sg.Popup('保存配置成功')
+    except:
+        sg.Popup('写入配置失败')
+
+
+def call_window_event_value_with_delay(window: sg.Window, key, value=None, delay: int = 0.1):
+    import threading
+    import time
+    thread = threading.Thread(
+        target=window.write_event_value, args=(key, value), daemon=True)
+    time.sleep(delay)
+    thread.start()
+
+
+def windows_init(window: sg.Window):
+    btn_read_yaml_config(window)
+    call_window_event_value_with_delay(window, "获取直播信息")
+
+
+# ---windows init and event loop
 try:
     window = sg.Window('QQ频道转播', layout, finalize=True)
-    btn_read_yaml_config(window)
+
+    windows_init(window)
+
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED:
@@ -87,13 +126,14 @@ try:
             # 通过列表选择器的输入提取对应的m3u8链接
             index = format_list.index(values['-SELECTOR-'])
             m3u8 = formats[index]["url"]
-            print(m3u8)
+            sg.cprint(f"当前选择:{m3u8}")
         elif event == '开始直播':
             try:
                 # 开启新进程 用于持续打印推流情况
                 window.perform_long_operation(
                     lambda: y2qq.restream(m3u8, values['ff'], values['key']), '-restream-')
                 window['停止推流'].update(visible=True)
+                btn_save_config_yaml(values, should_pop_up=False)
             except:
                 sg.Popup('推流失败,检查密钥和ffmpeg是否配置正确')
         elif event == '-restream-':
@@ -102,14 +142,7 @@ try:
             y2qq.stop_restream()
             sg.cprint('推流已经停止')
         elif event == 'save_yaml':
-            try:
-                # 保存配置字典到当前文件夹
-                dic = {'ff': values['ff'],
-                       'port': values['port']}
-                y2qq.write_yaml(dic)
-                sg.Popup('保存配置成功')
-            except:
-                sg.Popup('写入配置失败')
+            btn_save_config_yaml(values)
         elif event == 'read_yaml':
             btn_read_yaml_config(window)
         else:
