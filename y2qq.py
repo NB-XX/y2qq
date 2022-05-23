@@ -12,7 +12,13 @@ def set_proxy(in_port):
     port = in_port
     os.environ["http_proxy"] = f"http://127.0.0.1:{port}"
     os.environ["https_proxy"] = f"http://127.0.0.1:{port}"
-    sg.cprint('设置代理成功')
+
+    ydl = youtube_dl.YoutubeDL()
+    try:
+        if ydl.urlopen("https://www.google.com").code == 200:
+            sg.cprint('设置代理成功')
+    except Exception as e:
+        sg.cprint("请检测代理端口是否正确, 或对应代理软件是否已开放 http 代理")
 
 
 def get_format(in_url):
