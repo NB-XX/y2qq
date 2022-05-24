@@ -3,7 +3,12 @@ import PySimpleGUI as sg
 import subprocess as sp
 import youtube_dl
 import yaml
-
+import json
+import requests
+from bs4 import BeautifulSoup
+import re
+import time
+import datetime
 
 g_process = None
 
@@ -68,3 +73,43 @@ def read_yaml(file):
         return yaml_dic
     except:
         sg.Popup('未发现保存的配置')
+
+
+def isLiveNow(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    pattern = re.compile(r"var ytInitialPlayerResponse =(.*?);$",
+                         re.MULTILINE | re.DOTALL)
+    script = soup.find('script', text=pattern)
+    data_str = pattern.search(script.text).group(1)
+    data_json = json.loads(data_str, strict=False)
+    # 获取设定开播时间 若已开播获取不到该部分
+    try:
+        isUpcoming = data_json["videoDetails"]["isUpcoming"]
+        scheduledStartTime = data_json["playabilityStatus"]["liveStreamability"][
+            "liveStreamabilityRenderer"]["offlineSlate"]["liveStreamOfflineSlateRenderer"]["scheduledStartTime"]
+    except:
+        isUpcoming = False
+        scheduledStartTime = None
+    isLiveNow = data_json["microformat"]["playerMicroformatRenderer"]["liveBroadcastDetails"]["isLiveNow"]
+    check_result = [isUpcoming, isLiveNow, scheduledStartTime]
+    print(check_result)
+    return check_result
+
+
+def check_live(url):
+    check_result = isLiveNow(url)
+    # 计算距离开播的秒数
+    if check_result[0]:
+        timediff = (int(check_result[2])-int(time.time()))
+        sg.cprint(f'直播将于{timediff}s后开始')
+        time.sleep(timediff-30)
+    else:
+        pass
+        # 距直播还剩30s的时候开始反复检查是否开播
+    while check_result[1] == False:
+        now_time = datetime.datetime.now().strftime('%H:%M:%S')
+        sg.cprint(f'{now_time} 还没有开播')
+        time.sleep(15)
+        check_result = isLiveNow(url)
+    sg.cprint('直播开始了')
