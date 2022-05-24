@@ -2,13 +2,20 @@ import time
 import io
 import os
 import threading
+import requests
+
+g_m3u8_cache = {}  # virtual_filename: text
+g_m3u8_source = {}  # video_id: url
+g_local_m3u8_service = {}  # video_id: thread
 
 
-g_m3u8_cache = {}
+def setup_m3u8_src(video_id, m3u8_url, mask=0):
+    global g_m3u8_source
+    g_m3u8_source[video_id] = m3u8_url
 
 
 def get_filename_with_video_id(video_id, other_mask="0"):
-    return f"tmp_{video_id}_{other_mask}.m3u8"
+    return f"local_{video_id}_{other_mask}.m3u8"
 
 
 def prase_m3u8(file):
@@ -46,26 +53,33 @@ def prase_m3u8_with_virtual_path(filename):
     if g_m3u8_cache.get(filename):
         return prase_m3u8_with_text(g_m3u8_cache[filename])
     else:
-        raise Exception
+        return None
 
 
-def write_local_m3u8_file(duration, start_seq, seq_list, file_path, is_file=False):
+def write_local_m3u8_file(duration_str, start_seq, seq_list, file_path, is_file=False):
     global g_m3u8_cache
 
     file = open(file_path, "w") if is_file else io.StringIO()
     with file as f:
         f.write("#EXTM3U\n")
         f.write("#EXT-X-VERSION:3\n")
-        f.write(duration)
+        # f.write(duration_str)
+        seq_duration = float(seq_list[0].split("#EXTINF:")[1].split(",\n")[0])
+        duration = len(seq_list) * seq_duration
+        f.write(f"#EXT-X-TARGETDURATION:{duration}\n")
         f.write(f"#EXT-X-MEDIA-SEQUENCE:{start_seq}\n")
         for seq in seq_list:
             f.write(seq)
 
         if is_file == False:
             g_m3u8_cache[file_path] = file.getvalue()
+            print("-------------------------------")
+            print(file_path)
+            print("-------------------------------")
+            print(g_m3u8_cache[file_path])
 
 
-def merge_m3u8_file(video_id, m3u8_info_dict=None):
+def merge_m3u8_file(video_id, m3u8_info_dict):
     global g_m3u8_cache
     cur_duration_str = m3u8_info_dict["duration"]
     cur_start_seq = m3u8_info_dict["st_seq"]
@@ -77,7 +91,7 @@ def merge_m3u8_file(video_id, m3u8_info_dict=None):
     result_start_seq = cur_start_seq
     result_seq_list = cur_seq_list
 
-    tmp_file_path = get_filename_with_video_id(video_id)
+    tmp_file_path = video_id
     if g_m3u8_cache.get(tmp_file_path):
         old_m3u8_info_dict = prase_m3u8_with_virtual_path(tmp_file_path)
         old_start_seq = old_m3u8_info_dict["st_seq"]
@@ -104,30 +118,88 @@ def merge_m3u8_file(video_id, m3u8_info_dict=None):
 
 def __consume_m3u8(video_id):
     global g_m3u8_cache
-    tmp_file_path = get_filename_with_video_id(video_id)
-    if g_m3u8_cache.get(tmp_file_path):
-        while True:
-            m3u8_info_dict = prase_m3u8_with_virtual_path(tmp_file_path)
-            cur_duration_str = m3u8_info_dict["duration"]
-            cur_start_seq = m3u8_info_dict["st_seq"]
-            cur_seq_list = m3u8_info_dict["ts_list"]
-            if len(cur_seq_list) == 0:
-                break
-            cur_max_seq = cur_start_seq + len(cur_seq_list) - 1
+    global g_m3u8_source
 
-            result_start_seq = cur_start_seq + 1
-            result_seq_list = cur_seq_list[1:]
-            write_local_m3u8_file(
-                cur_duration_str, result_start_seq, result_seq_list, tmp_file_path
-            )
+    t = threading.currentThread()
+    tmp_file_path = video_id
+
+    retry_times = 0
+    try:
+        while getattr(t, "do_run", True):
+            is_request_ok = __request_remote_m3u8(video_id)
+
+            m3u8_info_dict = prase_m3u8_with_virtual_path(tmp_file_path)
+            cur_duration_str = m3u8_info_dict.get("duration")
+            cur_start_seq = m3u8_info_dict.get("st_seq")
+            cur_seq_list = m3u8_info_dict.get("ts_list", [])
+
+            if (
+                m3u8_info_dict == None
+                or len(cur_seq_list) == 0
+                or is_request_ok == False
+            ):  # no seq, should retry
+                time.sleep(1)
+                retry_times += 1
+                if retry_times >= 10:
+                    break
+            else:
+                retry_times = 0
 
             duration = float(cur_duration_str.split(":")[1].strip())
-            time.sleep(duration / 3)
+            seq_duration = float(cur_seq_list[0].split("#EXTINF:")[1].split(",\n")[0])
+
+            sleep_time = max(seq_duration, 1)
+            current_seq_len = len(cur_seq_list)
+            if current_seq_len > 60:  # for better catching up
+                remove_seq = 5
+                result_start_seq = cur_start_seq + remove_seq
+                result_seq_list = cur_seq_list[remove_seq:]
+                write_local_m3u8_file(
+                    cur_duration_str, result_start_seq, result_seq_list, tmp_file_path
+                )
+                print(f"Deleted 5 seq, Current:{current_seq_len - remove_seq}")
+            elif current_seq_len > 5:  # buffer seq
+                remove_seq = 1
+                result_start_seq = cur_start_seq + remove_seq
+                result_seq_list = cur_seq_list[remove_seq:]
+                write_local_m3u8_file(
+                    cur_duration_str, result_start_seq, result_seq_list, tmp_file_path
+                )
+                print(f"Deleted 1 seq, Current:{current_seq_len - remove_seq}")
+            else:
+                sleep_time = 1
+            print(f"Current Seq len:{current_seq_len}")
+            time.sleep(sleep_time)
+    except Exception as e:
+        pass
 
 
-def server_produce_m3u8(video_id):
-    thread = threading.Thread(target=__consume_m3u8, args=(video_id,), daemon=True)
+def __request_remote_m3u8(video_id):
+    is_OK = False
+    try:
+        url = g_m3u8_source[video_id]
+        ret = requests.get(url)
+        merge_m3u8_file(video_id, prase_m3u8_with_text(ret.text))
+        is_OK = True
+    except Exception as e:
+        pass
+    return is_OK
+
+
+def server_produce_m3u8(video_id, m3u8_url):
+    global g_local_m3u8_service
+    setup_m3u8_src(video_id, m3u8_url)
+
+    if g_local_m3u8_service.get(video_id):
+        g_local_m3u8_service[video_id].do_run = False
+        time.sleep(2)  # wait for thread end
+
+    thread = threading.Thread(target=__consume_m3u8, args=(video_id,))
+    g_local_m3u8_service[video_id] = thread
     thread.start()
+
+    # resturn local m3u8 url
+    return f"http://127.0.0.1:10800/{video_id}.m3u8"
 
 
 def __test():
@@ -144,7 +216,7 @@ def __test():
     m3u8_info_dict = prase_m3u8_with_path(os.path.join(fp, "test4.m3u8"))
     merge_m3u8_file(tmp_video_id, m3u8_info_dict)
 
-    print(g_m3u8_cache[get_filename_with_video_id(tmp_video_id)])
+    print(g_m3u8_cache[tmp_video_id])
     # server_produce_m3u8(tmp_video_id)
     # while True:
     #     time.sleep(30)
