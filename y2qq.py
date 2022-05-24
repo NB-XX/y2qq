@@ -51,7 +51,11 @@ def restream(m3u8, in_ffmpeg, in_key):
         for line in g_process.stdout:
             if 'speed' in line:
                 sg.cprint(line.rstrip("\n"))
-    except:
+            print(line)
+    except Exception as e:
+        import traceback
+        err_str = traceback.format_exc()
+        print(err_str)
         sg.cprint('推流失败')
 
 
