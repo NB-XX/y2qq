@@ -4,8 +4,11 @@ import os
 import threading
 
 
-def get_filename_with_video_id(video_id):
-    return f"tmp_{video_id}.m3u8"
+g_m3u8_cache = {}
+
+
+def get_filename_with_video_id(video_id, other_mask="0"):
+    return f"tmp_{video_id}_{other_mask}.m3u8"
 
 
 def prase_m3u8(file):
@@ -34,13 +37,22 @@ def prase_m3u8_with_text(m3u8_text):
     return prase_m3u8(file)
 
 
-def prase_m3u8_with_file(filename):
-    file = open(filename, "r")
+def prase_m3u8_with_path(fp):
+    file = open(fp, "r")
     return prase_m3u8(file)
 
 
-def write_local_m3u8_file(duration, start_seq, seq_list, file_path, is_using_file=True):
-    file = open(file_path, "w") if is_using_file else io.StringIO(file_path)
+def prase_m3u8_with_virtual_path(filename):
+    if g_m3u8_cache.get(filename):
+        return prase_m3u8_with_text(g_m3u8_cache[filename])
+    else:
+        raise Exception
+
+
+def write_local_m3u8_file(duration, start_seq, seq_list, file_path, is_file=False):
+    global g_m3u8_cache
+
+    file = open(file_path, "w") if is_file else io.StringIO()
     with file as f:
         f.write("#EXTM3U\n")
         f.write("#EXT-X-VERSION:3\n")
@@ -49,8 +61,12 @@ def write_local_m3u8_file(duration, start_seq, seq_list, file_path, is_using_fil
         for seq in seq_list:
             f.write(seq)
 
+        if is_file == False:
+            g_m3u8_cache[file_path] = file.getvalue()
 
-def merage_m3u8_file(video_id, m3u8_info_dict=None, max_cache_seq=10):
+
+def merge_m3u8_file(video_id, m3u8_info_dict=None):
+    global g_m3u8_cache
     cur_duration_str = m3u8_info_dict["duration"]
     cur_start_seq = m3u8_info_dict["st_seq"]
     cur_seq_list = m3u8_info_dict["ts_list"]
@@ -62,8 +78,8 @@ def merage_m3u8_file(video_id, m3u8_info_dict=None, max_cache_seq=10):
     result_seq_list = cur_seq_list
 
     tmp_file_path = get_filename_with_video_id(video_id)
-    if os.path.exists(tmp_file_path):
-        old_m3u8_info_dict = prase_m3u8_with_file(tmp_file_path)
+    if g_m3u8_cache.get(tmp_file_path):
+        old_m3u8_info_dict = prase_m3u8_with_virtual_path(tmp_file_path)
         old_start_seq = old_m3u8_info_dict["st_seq"]
         old_seq_list = old_m3u8_info_dict["ts_list"]
         old_max_seq = old_start_seq + len(old_seq_list) - 1
@@ -86,11 +102,12 @@ def merage_m3u8_file(video_id, m3u8_info_dict=None, max_cache_seq=10):
     )
 
 
-def consume_m3u8(video_id):
+def __consume_m3u8(video_id):
+    global g_m3u8_cache
     tmp_file_path = get_filename_with_video_id(video_id)
-    if os.path.exists(tmp_file_path):
+    if g_m3u8_cache.get(tmp_file_path):
         while True:
-            m3u8_info_dict = prase_m3u8_with_file(tmp_file_path)
+            m3u8_info_dict = prase_m3u8_with_virtual_path(tmp_file_path)
             cur_duration_str = m3u8_info_dict["duration"]
             cur_start_seq = m3u8_info_dict["st_seq"]
             cur_seq_list = m3u8_info_dict["ts_list"]
@@ -109,29 +126,29 @@ def consume_m3u8(video_id):
 
 
 def server_produce_m3u8(video_id):
-    thread = threading.Thread(target=consume_m3u8, args=(video_id,), daemon=True)
+    thread = threading.Thread(target=__consume_m3u8, args=(video_id,), daemon=True)
     thread.start()
 
 
 def __test():
     tmp_video_id = "231231"
     fp = os.path.join(os.getcwd(), "m3u8_cache", "testFiles")
-    m3u8_info_dict = prase_m3u8_with_file(os.path.join(fp, "test1.m3u8"))
-    merage_m3u8_file(tmp_video_id, m3u8_info_dict)
-    m3u8_info_dict = prase_m3u8_with_file(os.path.join(fp, "test1copy.m3u8"))
-    merage_m3u8_file(tmp_video_id, m3u8_info_dict)
-    m3u8_info_dict = prase_m3u8_with_file(os.path.join(fp, "test2.m3u8"))
-    merage_m3u8_file(tmp_video_id, m3u8_info_dict)
-    m3u8_info_dict = prase_m3u8_with_file(os.path.join(fp, "test3.m3u8"))
-    merage_m3u8_file(tmp_video_id, m3u8_info_dict)
-    m3u8_info_dict = prase_m3u8_with_file(os.path.join(fp, "test4.m3u8"))
-    merage_m3u8_file(tmp_video_id, m3u8_info_dict)
+    m3u8_info_dict = prase_m3u8_with_path(os.path.join(fp, "test1.m3u8"))
+    merge_m3u8_file(tmp_video_id, m3u8_info_dict)
+    m3u8_info_dict = prase_m3u8_with_path(os.path.join(fp, "test1copy.m3u8"))
+    merge_m3u8_file(tmp_video_id, m3u8_info_dict)
+    m3u8_info_dict = prase_m3u8_with_path(os.path.join(fp, "test2.m3u8"))
+    merge_m3u8_file(tmp_video_id, m3u8_info_dict)
+    m3u8_info_dict = prase_m3u8_with_path(os.path.join(fp, "test3.m3u8"))
+    merge_m3u8_file(tmp_video_id, m3u8_info_dict)
+    m3u8_info_dict = prase_m3u8_with_path(os.path.join(fp, "test4.m3u8"))
+    merge_m3u8_file(tmp_video_id, m3u8_info_dict)
 
-    server_produce_m3u8(tmp_video_id)
+    print(g_m3u8_cache[get_filename_with_video_id(tmp_video_id)])
+    # server_produce_m3u8(tmp_video_id)
+    # while True:
+    #     time.sleep(30)
+    #     break
 
-    while True:
-        time.sleep(30)
-        break
 
-
-__test()
+# __test()
