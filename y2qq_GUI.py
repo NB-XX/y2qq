@@ -25,6 +25,7 @@ output_Ml = sg.Multiline(key='Output', disabled=True,
                          size=(50, 17), autoscroll=True, reroute_cprint=True)
 start_button = sg.Button('开始直播', size=14)
 stop_button = sg.Button('停止推流', visible=False, size=14)
+auto_live_check = sg.Button('挂机模式', key='-isLiveNow-')
 format_list_text = sg.Text('选择分辨率')
 format_list_selector = sg.Combo(
     format_list, key='-SELECTOR-', readonly=True, enable_events=True, size=20)
@@ -137,6 +138,11 @@ try:
             except:
                 sg.Popup('推流失败,检查密钥和ffmpeg是否配置正确')
         elif event == '-restream-':
+            pass
+        elif event == '-isLiveNow-':
+            window.perform_long_operation(
+                lambda: y2qq.check_live(values['url']), '-check-')
+        elif event == '-check-':
             pass
         elif event == '停止推流':
             y2qq.stop_restream()
