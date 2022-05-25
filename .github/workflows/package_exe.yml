@@ -31,6 +31,7 @@ jobs:
           main: y2qq_GUI
           use-dependencies: true
           artifact: y2qq_GUI
+          no-console: true
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
