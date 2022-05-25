@@ -5,14 +5,40 @@ windows端可直接运行编译好的y2qq.exe。
 其他平台下载本项目，用python运行y2qq_GUI.py即可。
 
 #### 依赖：
-
-ffmpeg https://ffmpeg.org/download.html  
-youtube-dl https://yt-dl.org/downloads/2021.12.17/youtube-dl.exe  
-注：若直接运行python文件，需安装PySimpleGUI库  
+## ffmpeg
+https://ffmpeg.org/download.html  
+## 依赖包
 ```
-pip install PySimpleGUI
+pip install -r .\requirements.txt
 ```
 
+#### exe打包流程
+   
+1. 安装虚拟环境
+```
+pip install virtualenv
+```
+
+2. 创建虚拟环境
+```
+virtualenv win_pack
+```
+
+3. powershell运行权限设置 (如有)
+```
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+```
+
+4. 打开虚拟环境 (如使用IDE可直接选择环境)
+```
+./win_pack/Scripts/Activate.ps1
+```
+
+5. 运行打包
+```
+pip install -r .\requirements.txt
+pyinstaller -wF --clean .\y2qq_GUI.py
+```
 
 
  
