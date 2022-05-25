@@ -33,12 +33,6 @@ jobs:
           artifact: y2qq_GUI
           no-console: true
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: y2qq_GUI
-          path: dist
-
       - name: Build Python updater
         uses: eric2788/pyinstaller-build@master
         with:
@@ -50,5 +44,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: updater
+          name: y2qq_GUI
           path: dist
