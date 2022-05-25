@@ -6,9 +6,9 @@ name: package_exe
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,14 +25,22 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - name: Build Python Exe
+      - name: Build Python y2qq_GUI
         uses: eric2788/pyinstaller-build@master
         with:
           main: y2qq_GUI
           use-dependencies: true
           artifact: y2qq_GUI
           no-console: true
-          
+
+      - name: Build Python updater
+        uses: eric2788/pyinstaller-build@master
+        with:
+          main: updater
+          use-dependencies: false
+          artifact: updater
+          no-console: false
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
