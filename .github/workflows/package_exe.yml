@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: y2qq_GUI
-          path: release
+          path: .
