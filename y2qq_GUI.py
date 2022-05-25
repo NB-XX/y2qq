@@ -1,6 +1,15 @@
+import os
+import threading
+from distutils.version import LooseVersion
+import requests
+
 import PySimpleGUI as sg
+
 import y2qq
+import updater
 from m3u8_cache import m3u8_cache, server
+
+EXE_VERSION = "2.2.0"
 
 # start a local server
 server.start_server()
@@ -47,6 +56,7 @@ format_list_selector = sg.Combo(
 
 # 左侧布局
 left_col = [
+    [sg.Button("更新版本", key="check_update", size=10)],
     [ff_text, ff_input, sg.FileBrowse("选择ffmpeg.exe")],
     [port_text, port_input, port_button],
     [save_button, read_button],
@@ -63,8 +73,12 @@ def btn_read_yaml_config(window):
     # 读取保存的配置并更新到控件
     try:
         dic = y2qq.read_yaml("config.yaml")
-        window["ff"].update(dic["ff"])
-        window["port"].update(dic["port"])
+        tmp_ff_path = dic["ff"]
+        if tmp_ff_path != "":
+            window["ff"].update(tmp_ff_path)
+        tmp_port = dic["port"]
+        if tmp_port != "":
+            window["port"].update(tmp_port)
 
         if dic.get("last_ytb_link"):
             window["url"].update(dic.get("last_ytb_link"))
@@ -94,7 +108,6 @@ def btn_save_config_yaml(values, should_pop_up=True):
 def call_window_event_value_with_delay(
     window: sg.Window, key, value=None, delay: int = 0.1
 ):
-    import threading
     import time
 
     thread = threading.Thread(
@@ -102,6 +115,63 @@ def call_window_event_value_with_delay(
     )
     time.sleep(delay)
     thread.start()
+
+
+def check_update_info():
+    response = requests.get("https://api.github.com/repos/NB-XX/y2qq/releases/latest")
+    info_dict = response.json()
+    return info_dict
+
+
+def download_file(url, parent_path=updater.g_update_path):
+    local_filename = url.split("/")[-1]
+    os.makedirs(parent_path, exist_ok=True)
+    fp = os.path.join(parent_path, local_filename)
+    # NOTE the stream=True parameter below
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(fp, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                # If you have chunk encoded response uncomment if
+                # and set chunk_size parameter to None.
+                # if chunk:
+                f.write(chunk)
+    return fp
+
+
+def check_update(window: sg.Window):
+    try:
+        info_dict = check_update_info()
+        tag_name = info_dict["tag_name"]
+        tmp_version = tag_name.strip("v")
+        if tmp_version > LooseVersion(EXE_VERSION):
+            assets = info_dict["assets"]
+            sg.cprint("正在更新中。。。请稍等\n更新期间请勿操作\n如长时间没反应,请检测网络和代理设置.\n然后关闭应用重新再打开")
+            update_exe(assets, window)
+        else:
+            sg.popup(f"当前版本:{EXE_VERSION}; 最新版本: {tmp_version}, 暂不需要更新")
+    except Exception as e:
+        sg.popup("更新失败, 请检测网络或设置代理后重试")
+
+
+def update_exe(assets, window: sg.Window):
+    thread = threading.Thread(target=__update_exe, args=(assets, window), daemon=True)
+    thread.start()
+
+
+def __update_exe(assets, window: sg.Window):
+    import os
+    from subprocess import Popen
+
+    for file in assets:
+        if file["name"].endswith(".exe"):
+            download_url = file["browser_download_url"]
+            download_file(download_url)
+    try:
+        Popen(os.path.join(os.getcwd(), "updater.exe"))
+        window.write_event_value(sg.WIN_CLOSED, None)
+    except FileNotFoundError as e:
+        window.write_event_value("-Missing_Updater-", None)
 
 
 def windows_init(window: sg.Window):
@@ -178,6 +248,10 @@ try:
             btn_save_config_yaml(values)
         elif event == "read_yaml":
             btn_read_yaml_config(window)
+        elif event == "check_update":
+            check_update(window)
+        elif event == "-Missing_Updater-":
+            sg.popup("找不到updater.exe")
         else:
             sg.Popup(f"未处理未知事件:【{event}】")
 except Exception as e:
