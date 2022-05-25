@@ -1,0 +1,6 @@
+pyinstaller
+PySimpleGUI
+requests
+youtube_dl
+beautifulsoup4
+PyYAML
