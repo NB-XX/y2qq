@@ -1,3 +1,4 @@
+import traceback
 import time
 import io
 import os
@@ -50,6 +51,7 @@ def prase_m3u8_with_path(fp):
 
 
 def prase_m3u8_with_virtual_path(filename):
+    global g_m3u8_cache
     if g_m3u8_cache.get(filename):
         return prase_m3u8_with_text(g_m3u8_cache[filename])
     else:
@@ -116,13 +118,39 @@ def merge_m3u8_file(video_id, m3u8_info_dict):
             result_seq_list = old_seq_list + misssing_list + cur_seq_list
             result_start_seq = old_start_seq
 
-    if len(result_seq_list) > 60:  # keep about 60 seq
-        result_start_seq += 10
-        result_seq_list = result_seq_list[10:]
-        
+    # clip the #EXT-X-DISCONTINUITY at the head
+    result_start_seq, result_seq_list = clip_seq_if_start_with_discontinuty(
+        result_start_seq, result_seq_list
+    )
+
+    # keep ablout 60 seq
+    if len(result_seq_list) > 60:
+        result_start_seq, result_seq_list = clip_seq_if_start_with_discontinuty(
+            result_start_seq, result_seq_list, clip_num=10
+        )
+
     write_local_m3u8_file(
         result_duration_str, result_start_seq, result_seq_list, tmp_file_path
     )
+
+
+def clip_seq_if_start_with_discontinuty(result_start_seq, result_seq_list, clip_num=0):
+    tmp_discontinuity_count = 0
+    for seq in result_seq_list:
+        if "#EXT-X-DISCONTINUITY" in seq:
+            tmp_discontinuity_count += 1
+        else:
+            break
+
+    # select max clip num
+    clip_num = max(tmp_discontinuity_count, clip_num)
+
+    if clip_num > 0:
+        result_start_seq += clip_num
+        result_seq_list = result_seq_list[clip_num:]
+
+        print(f"Clipping head: [{clip_num}]")
+    return result_start_seq, result_seq_list
 
 
 def __consume_m3u8(video_id):
@@ -135,7 +163,7 @@ def __consume_m3u8(video_id):
     retry_times = 0
     try:
         while getattr(t, "do_run", True):
-            is_request_ok = request_remote_m3u8(video_id)
+            is_request_ok = request_remote_m3u8_sync(video_id)
 
             m3u8_info_dict = prase_m3u8_with_virtual_path(tmp_file_path)
             cur_duration_str = m3u8_info_dict.get("duration")
@@ -156,8 +184,10 @@ def __consume_m3u8(video_id):
 
             duration = float(cur_duration_str.split(":")[1].strip())
             try:
-                seq_duration = float(cur_seq_list[-1].split("#EXTINF:")[1].split(",\n")[0])
-            except Exception as e:  # handle 
+                seq_duration = float(
+                    cur_seq_list[-1].split("#EXTINF:")[1].split(",\n")[0]
+                )
+            except Exception as e:  # handle
                 seq_duration = 1.0
 
             sleep_time = max(seq_duration, 1)
@@ -183,13 +213,12 @@ def __consume_m3u8(video_id):
             print(f"Current Seq len:{current_seq_len}")
             time.sleep(sleep_time)
     except Exception as e:
-        import traceback
         err_str = traceback.format_exc()
         print(err_str)
         pass
 
 
-def request_remote_m3u8(video_id):
+def request_remote_m3u8_sync(video_id):
     is_OK = False
     try:
         url = g_m3u8_source[video_id]
@@ -197,10 +226,14 @@ def request_remote_m3u8(video_id):
         merge_m3u8_file(video_id, prase_m3u8_with_text(ret.text))
         is_OK = True
     except Exception as e:
-        import traceback
         err_str = traceback.format_exc()
         print(err_str)
     return is_OK
+
+
+def request_remote_m3u8_async(video_id):
+    thread = threading.Thread(target=request_remote_m3u8_sync, args=(video_id,))
+    thread.start()
 
 
 def server_produce_m3u8(video_id, m3u8_url):
@@ -215,7 +248,12 @@ def server_produce_m3u8(video_id, m3u8_url):
     # thread.start()
     # time.sleep(5)  # wait for thread requesting first m3u8 files
 
-    request_remote_m3u8(video_id)
+    # block retry for init m3u8
+    for i in range(3):
+        is_request_ok = request_remote_m3u8_sync(video_id)
+        if is_request_ok:
+            break
+        time.sleep(1)
     # resturn local m3u8 url
     return f"http://127.0.0.1:10800/{video_id}.m3u8"
 
