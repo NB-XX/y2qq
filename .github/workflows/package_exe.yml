@@ -18,21 +18,22 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - name: Test Build Python Exe
+      - name: Build Python Exe
         uses: eric2788/pyinstaller-build@master
         with:
           main: y2qq_GUI
           use-dependencies: true
+          artifact: y2qq_GUI
           
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: y2qq_GUI
-          path: .
+          path: dist
