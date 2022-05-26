@@ -190,7 +190,7 @@ def check_update(window: sg.Window):
         info_dict = check_update_info()
         tag_name = info_dict["tag_name"]
         tmp_version = tag_name.strip("v")
-        if tmp_version > LooseVersion(EXE_VERSION):
+        if LooseVersion(tmp_version) > LooseVersion(EXE_VERSION):
             assets = info_dict["assets"]
             sg.cprint("正在更新中。。。请稍等\n更新期间请勿操作\n如长时间没反应,请检测网络和代理设置.\n然后关闭应用重新再打开")
             update_exe(assets, window)
