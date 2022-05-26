@@ -11,8 +11,8 @@ class LocalM3u8_Handler(http.server.BaseHTTPRequestHandler):
         if fn.endswith(".m3u8"):  # for better understanding url
             video_id = fn.split(".m3u8")[0]
 
-            # update m3u8 for next request
-            m3u8_cache.request_remote_m3u8_async(video_id)
+            # # update m3u8 for next request
+            # m3u8_cache.request_remote_m3u8_async(video_id)
 
             if m3u8_cache.g_m3u8_cache.get(video_id):
                 self.send_response(200)
