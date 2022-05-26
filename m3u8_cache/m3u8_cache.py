@@ -10,7 +10,7 @@ g_m3u8_source = {}  # video_id: url
 g_local_m3u8_service = {}  # video_id: thread
 
 
-def setup_m3u8_src(video_id, m3u8_url, mask=0):
+def setup_m3u8_src(video_id, m3u8_url):
     global g_m3u8_source
     g_m3u8_source[video_id] = m3u8_url
 
@@ -230,7 +230,6 @@ def stop_server_produce_m3u8():
 def server_produce_m3u8(video_id, m3u8_url):
     global g_local_m3u8_service
     global g_m3u8_cache
-    setup_m3u8_src(video_id, m3u8_url)
 
     if g_local_m3u8_service.get(video_id):
         stop_server_produce_m3u8()
