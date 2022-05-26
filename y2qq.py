@@ -43,11 +43,13 @@ def get_format(in_url):
 
 def restream(m3u8, in_ffmpeg, in_key):
     global g_process
+    stop_restream()
+    
     ffmpeg_path = in_ffmpeg
     key = in_key
     try:
         g_process = sp.Popen(
-            [ffmpeg_path, '-i', m3u8, '-vcodec', 'copy', '-acodec', 'aac', '-f', 'flv', f"rtmp://6721.livepush.myqcloud.com/live/{key}"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
+            [ffmpeg_path, "-re", '-i', m3u8, '-vcodec', 'copy', '-acodec', 'aac', '-f', 'flv', f"rtmp://6721.livepush.myqcloud.com/live/{key}"], stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True)
         for line in g_process.stdout:
             if 'speed' in line:
                 sg.cprint(line.rstrip("\n"))

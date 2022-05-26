@@ -118,15 +118,15 @@ def merge_m3u8_file(video_id, m3u8_info_dict):
             result_seq_list = old_seq_list + misssing_list + cur_seq_list
             result_start_seq = old_start_seq
 
-    # clip the #EXT-X-DISCONTINUITY at the head
-    result_start_seq, result_seq_list = clip_seq_if_start_with_discontinuty(
-        result_start_seq, result_seq_list
-    )
+    # # clip the #EXT-X-DISCONTINUITY at the head
+    # result_start_seq, result_seq_list = clip_seq_if_start_with_discontinuty(
+    #     result_start_seq, result_seq_list
+    # )
 
-    # keep ablout 60 seq
-    if len(result_seq_list) > 60:
+    # keep ablout 30 seq
+    if len(result_seq_list) > 30:
         result_start_seq, result_seq_list = clip_seq_if_start_with_discontinuty(
-            result_start_seq, result_seq_list, clip_num=10
+            result_start_seq, result_seq_list, clip_num=5
         )
 
     write_local_m3u8_file(
@@ -135,15 +135,15 @@ def merge_m3u8_file(video_id, m3u8_info_dict):
 
 
 def clip_seq_if_start_with_discontinuty(result_start_seq, result_seq_list, clip_num=0):
-    tmp_discontinuity_count = 0
-    for seq in result_seq_list:
-        if "#EXT-X-DISCONTINUITY" in seq:
-            tmp_discontinuity_count += 1
-        else:
-            break
+    # tmp_discontinuity_count = 0
+    # for seq in result_seq_list:
+    #     if "#EXT-X-DISCONTINUITY" in seq:
+    #         tmp_discontinuity_count += 1
+    #     else:
+    #         break
 
-    # select max clip num
-    clip_num = max(tmp_discontinuity_count, clip_num)
+    # # select max clip num
+    # clip_num = max(tmp_discontinuity_count, clip_num)
 
     if clip_num > 0:
         result_start_seq += clip_num
@@ -163,26 +163,22 @@ def __consume_m3u8(video_id):
     retry_times = 0
     try:
         while getattr(t, "do_run", True):
-            is_request_ok = request_remote_m3u8_sync(video_id)
+            request_remote_m3u8_async(video_id)
 
             m3u8_info_dict = prase_m3u8_with_virtual_path(tmp_file_path)
-            cur_duration_str = m3u8_info_dict.get("duration")
-            cur_start_seq = m3u8_info_dict.get("st_seq")
-            cur_seq_list = m3u8_info_dict.get("ts_list", [])
+            cur_seq_list = []
+            if m3u8_info_dict:
+                cur_seq_list = m3u8_info_dict.get("ts_list", [])
 
-            if (
-                m3u8_info_dict == None
-                or len(cur_seq_list) == 0
-                or is_request_ok == False
-            ):  # no seq, should retry
+            if m3u8_info_dict == None or len(cur_seq_list) == 0:  # no seq, should retry
                 time.sleep(1)
                 retry_times += 1
                 if retry_times >= 10:
                     break
+                continue
             else:
                 retry_times = 0
 
-            duration = float(cur_duration_str.split(":")[1].strip())
             try:
                 seq_duration = float(
                     cur_seq_list[-1].split("#EXTINF:")[1].split(",\n")[0]
@@ -192,24 +188,7 @@ def __consume_m3u8(video_id):
 
             sleep_time = max(seq_duration, 1)
             current_seq_len = len(cur_seq_list)
-            if current_seq_len > 60:  # for better catching up
-                remove_seq = 5
-                result_start_seq = cur_start_seq + remove_seq
-                result_seq_list = cur_seq_list[remove_seq:]
-                write_local_m3u8_file(
-                    cur_duration_str, result_start_seq, result_seq_list, tmp_file_path
-                )
-                print(f"Deleted 5 seq, Current:{current_seq_len - remove_seq}")
-            elif current_seq_len > 5:  # buffer seq
-                remove_seq = 1
-                result_start_seq = cur_start_seq + remove_seq
-                result_seq_list = cur_seq_list[remove_seq:]
-                write_local_m3u8_file(
-                    cur_duration_str, result_start_seq, result_seq_list, tmp_file_path
-                )
-                print(f"Deleted 1 seq, Current:{current_seq_len - remove_seq}")
-            else:
-                sleep_time = 1
+
             print(f"Current Seq len:{current_seq_len}")
             time.sleep(sleep_time)
     except Exception as e:
@@ -221,10 +200,11 @@ def __consume_m3u8(video_id):
 def request_remote_m3u8_sync(video_id):
     is_OK = False
     try:
-        url = g_m3u8_source[video_id]
-        ret = requests.get(url)
-        merge_m3u8_file(video_id, prase_m3u8_with_text(ret.text))
-        is_OK = True
+        url = g_m3u8_source.get(video_id)
+        if url:
+            ret = requests.get(url)
+            merge_m3u8_file(video_id, prase_m3u8_with_text(ret.text))
+            is_OK = True
     except Exception as e:
         err_str = traceback.format_exc()
         print(err_str)
@@ -236,17 +216,26 @@ def request_remote_m3u8_async(video_id):
     thread.start()
 
 
+def stop_server_produce_m3u8():
+    global g_m3u8_cache
+    global g_local_m3u8_service
+
+    for k, v in g_local_m3u8_service.items():
+        g_local_m3u8_service[k].do_run = False
+    time.sleep(1)  # wait for thread end
+    g_local_m3u8_service = {}  # clear all service
+    g_m3u8_cache = {}  # clear all cache
+
+
 def server_produce_m3u8(video_id, m3u8_url):
     global g_local_m3u8_service
+    global g_m3u8_cache
     setup_m3u8_src(video_id, m3u8_url)
 
-    # if g_local_m3u8_service.get(video_id):
-    #     g_local_m3u8_service[video_id].do_run = False
-    #     time.sleep(2)  # wait for thread end
-    # thread = threading.Thread(target=__consume_m3u8, args=(video_id,))
-    # g_local_m3u8_service[video_id] = thread
-    # thread.start()
-    # time.sleep(5)  # wait for thread requesting first m3u8 files
+    if g_local_m3u8_service.get(video_id):
+        stop_server_produce_m3u8()
+    thread = threading.Thread(target=__consume_m3u8, args=(video_id,))
+    g_local_m3u8_service[video_id] = thread
 
     # block retry for init m3u8
     for i in range(3):
@@ -254,6 +243,9 @@ def server_produce_m3u8(video_id, m3u8_url):
         if is_request_ok:
             break
         time.sleep(1)
+
+    thread.start()
+
     # resturn local m3u8 url
     return f"http://127.0.0.1:10800/{video_id}.m3u8"
 

@@ -243,6 +243,7 @@ try:
             pass
         elif event == "停止推流":
             y2qq.stop_restream()
+            m3u8_cache.stop_server_produce_m3u8()
             sg.cprint("推流已经停止")
         elif event == "save_yaml":
             btn_save_config_yaml(values)
