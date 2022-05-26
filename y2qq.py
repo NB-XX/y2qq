@@ -48,12 +48,30 @@ def get_format(in_url):
         sg.cprint("检查直播链接输入是否正确")
 
 
-def restream(m3u8, video_url, in_ffmpeg, in_server_url, in_key):
+def __refresh_remote_m3u8(video_id, video_url, select_format="480p"):
+    format_list = get_format(video_url)
+    select_format = select_format.strip("p")
+
+    result_url = None
+    for f in format_list:
+        height = f["height"]
+        if str(height) == select_format:
+            result_url = f["url"]
+
+    if result_url == None:
+        result_url = format_list[0]["url"]
+
+    m3u8_cache.setup_m3u8_src(video_id, result_url)
+
+
+def restream(m3u8, video_url, selected_format, in_ffmpeg, in_server_url, in_key):
     global g_process
     stop_restream()
 
     # 取代远端 m3u8, 本地读取 m3u8 合并多个Seq
     video_id = video_url.split("v=")[1].strip()
+
+    m3u8_cache.setup_m3u8_src(video_id, m3u8)
     local_m3u8_url = m3u8_cache.server_produce_m3u8(video_id, m3u8)
     sg.cprint(f"本地 m3u8 url:\n{local_m3u8_url}")
 
@@ -83,9 +101,21 @@ def restream(m3u8, video_url, in_ffmpeg, in_server_url, in_key):
         g_process = sp.Popen(
             run_args, stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True
         )
+        trigger_time = 0
         for line in g_process.stdout:
             if "speed" in line:
                 sg.cprint(line.rstrip("\n"))
+
+                # 三次推送速度过慢时, 尝试重新获取远端m3u8
+                try:
+                    speed = line.split("speed=")[-1].split("x")[0].strip()
+                    if float(speed) < 0.8:
+                        trigger_time += 1
+                        if trigger_time > 3:
+                            __refresh_remote_m3u8(video_id, video_url, selected_format)
+                            trigger_time = 0
+                except Exception as e:
+                    pass
             elif "Error " in line:
                 sg.cprint(line.rstrip("\n"))
 

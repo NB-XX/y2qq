@@ -174,6 +174,7 @@ try:
                     lambda: y2qq.restream(
                         g_current_m3u8_url,
                         values["url"],
+                        g_current_selected_format,
                         values["ff"],
                         values["live_server"],
                         values["key"],
