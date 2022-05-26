@@ -121,9 +121,10 @@ def restream(m3u8, video_url, selected_format, in_ffmpeg, in_server_url, in_key)
                     pass
             elif "Error " in line:
                 sg.cprint(line.rstrip("\n"))
-
-                raise Exception
-            print(line)
+                print(line)
+                
+        # for out putting the end of process
+        raise Exception
     except Exception as e:
         import traceback
 
