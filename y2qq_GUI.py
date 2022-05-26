@@ -1,15 +1,10 @@
-import os
 import threading
-from distutils.version import LooseVersion
-import requests
 
 import PySimpleGUI as sg
 
 import y2qq
-import updater
-from m3u8_cache import m3u8_cache, server
+from m3u8_cache import server
 
-EXE_VERSION = "2.2.0"
 
 # start a local server
 server.start_server()
@@ -38,11 +33,18 @@ port_button = sg.Button(
 )
 save_button = sg.Button("保存配置", key="save_yaml", size=14)
 read_button = sg.Button("使用配置", key="read_yaml", size=14)
+
 url_text = sg.Text("输入youtube链接")
 url_input = sg.InputText(key="url", size=6)
+
 m3u8_button = sg.Button("获取直播信息", size=9)
+
 key_text = sg.Text("输入直播密钥")
 key_input = sg.InputText(key="key", size=20)
+live_server_text = sg.Text("输入直播服务器")
+live_server_input = sg.Input(
+    key="live_server", size=20, default_text="rtmp://6721.livepush.myqcloud.com/live/"
+)
 output_Ml = sg.Multiline(
     key="Output", disabled=True, size=(50, 17), autoscroll=True, reroute_cprint=True
 )
@@ -61,6 +63,7 @@ left_col = [
     [port_text, port_input, port_button],
     [save_button, read_button],
     [url_text, url_input, m3u8_button],
+    [live_server_text, live_server_input],
     [key_text, key_input],
     [format_list_text, format_list_selector],
     [start_button, stop_button],
@@ -69,16 +72,20 @@ layout = [[sg.Column(left_col), output_Ml]]
 
 
 # ---temp function. Maybe move to outer file for better constuct
-def btn_read_yaml_config(window):
+def btn_read_yaml_config(window: sg.Window):
     # 读取保存的配置并更新到控件
     try:
         dic = y2qq.read_yaml("config.yaml")
-        tmp_ff_path = dic["ff"]
+        tmp_ff_path = dic.get("ff", "")
         if tmp_ff_path != "":
             window["ff"].update(tmp_ff_path)
-        tmp_port = dic["port"]
+        tmp_port = dic.get("port", "")
         if tmp_port != "":
             window["port"].update(tmp_port)
+
+        tmp_live_server = dic.get("live_server", "")
+        if tmp_live_server != "":
+            window["live_server"].update(tmp_live_server)
 
         if dic.get("last_ytb_link"):
             window["url"].update(dic.get("last_ytb_link"))
@@ -97,6 +104,7 @@ def btn_save_config_yaml(values, should_pop_up=True):
             "port": values["port"],
             "last_ytb_link": values["url"],
             "last_key": values["key"],
+            "live_server": values["live_server"],
         }
         y2qq.write_yaml(dic)
         if should_pop_up:
@@ -115,63 +123,6 @@ def call_window_event_value_with_delay(
     )
     time.sleep(delay)
     thread.start()
-
-
-def check_update_info():
-    response = requests.get("https://api.github.com/repos/NB-XX/y2qq/releases/latest")
-    info_dict = response.json()
-    return info_dict
-
-
-def download_file(url, parent_path=updater.g_update_path):
-    local_filename = url.split("/")[-1]
-    os.makedirs(parent_path, exist_ok=True)
-    fp = os.path.join(parent_path, local_filename)
-    # NOTE the stream=True parameter below
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(fp, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                # If you have chunk encoded response uncomment if
-                # and set chunk_size parameter to None.
-                # if chunk:
-                f.write(chunk)
-    return fp
-
-
-def check_update(window: sg.Window):
-    try:
-        info_dict = check_update_info()
-        tag_name = info_dict["tag_name"]
-        tmp_version = tag_name.strip("v")
-        if tmp_version > LooseVersion(EXE_VERSION):
-            assets = info_dict["assets"]
-            sg.cprint("正在更新中。。。请稍等\n更新期间请勿操作\n如长时间没反应,请检测网络和代理设置.\n然后关闭应用重新再打开")
-            update_exe(assets, window)
-        else:
-            sg.popup(f"当前版本:{EXE_VERSION}; 最新版本: {tmp_version}, 暂不需要更新")
-    except Exception as e:
-        sg.popup("更新失败, 请检测网络或设置代理后重试")
-
-
-def update_exe(assets, window: sg.Window):
-    thread = threading.Thread(target=__update_exe, args=(assets, window), daemon=True)
-    thread.start()
-
-
-def __update_exe(assets, window: sg.Window):
-    import os
-    from subprocess import Popen
-
-    for file in assets:
-        if file["name"].endswith(".exe"):
-            download_url = file["browser_download_url"]
-            download_file(download_url)
-    try:
-        Popen(os.path.join(os.getcwd(), "updater.exe"))
-        window.write_event_value(sg.WIN_CLOSED, None)
-    except FileNotFoundError as e:
-        window.write_event_value("-Missing_Updater-", None)
 
 
 def windows_init(window: sg.Window):
@@ -219,18 +170,20 @@ try:
             sg.cprint(f"当前选择:{m3u8}")
         elif event == "开始直播":
             try:
-                # 取代远端 m3u8, 本地读取 m3u8 合并多个Seq
-                video_id = values["url"].split("v=")[1].strip()
-                local_m3u8_url = m3u8_cache.server_produce_m3u8(video_id, m3u8)
-                sg.cprint(f"本地 m3u8 url:\n{local_m3u8_url}")
+                btn_save_config_yaml(values, should_pop_up=False)
 
                 # 开启新进程 用于持续打印推流情况
                 window.perform_long_operation(
-                    lambda: y2qq.restream(local_m3u8_url, values["ff"], values["key"]),
+                    lambda: y2qq.restream(
+                        m3u8,
+                        values["url"],
+                        values["ff"],
+                        values["live_server"],
+                        values["key"],
+                    ),
                     "-restream-",
                 )
                 window["停止推流"].update(visible=True)
-                btn_save_config_yaml(values, should_pop_up=False)
             except Exception as e:
                 sg.Popup("推流失败,检查密钥和ffmpeg是否配置正确")
         elif event == "-restream-":
@@ -243,14 +196,13 @@ try:
             pass
         elif event == "停止推流":
             y2qq.stop_restream()
-            m3u8_cache.stop_server_produce_m3u8()
             sg.cprint("推流已经停止")
         elif event == "save_yaml":
             btn_save_config_yaml(values)
         elif event == "read_yaml":
             btn_read_yaml_config(window)
         elif event == "check_update":
-            check_update(window)
+            y2qq.check_update(window)
         elif event == "-Missing_Updater-":
             sg.popup("找不到updater.exe")
         else:
