@@ -62,24 +62,26 @@ def restream(m3u8, video_url, in_ffmpeg, in_server_url, in_key):
     ffmpeg_path = in_ffmpeg
     server_url = in_server_url if in_server_url.endswith("/") else in_server_url + "/"
     key = in_key
+
+    # FFMPEG 命令
+    # --------------------
+    run_args = []
+    run_args += [ffmpeg_path]
+
+    # run_args += ["-thread_queue_size", "4"]
+
+    run_args += ["-re"]
+    run_args += ["-i", using_m3u8]
+    run_args += ["-vcodec", "copy", "-acodec", "aac"]
+
+    run_args += ["-f", "flv"]
+
+    run_args += [f"{server_url}{key}"]
+    # --------------------
+
     try:
         g_process = sp.Popen(
-            [
-                ffmpeg_path,
-                "-re",
-                "-i",
-                using_m3u8,
-                "-vcodec",
-                "copy",
-                "-acodec",
-                "aac",
-                "-f",
-                "flv",
-                f"{server_url}{key}",
-            ],
-            stdout=sp.PIPE,
-            stderr=sp.STDOUT,
-            universal_newlines=True,
+            run_args, stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True
         )
         for line in g_process.stdout:
             if "speed" in line:
