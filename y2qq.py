@@ -93,13 +93,16 @@ def restream(m3u8, video_url, selected_format, in_ffmpeg, in_server_url, in_key)
     run_args += ["-vcodec", "copy", "-acodec", "aac"]
 
     run_args += ["-f", "flv"]
-
     run_args += [f"{server_url}{key}"]
     # --------------------
 
     try:
         g_process = sp.Popen(
-            run_args, stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True
+            run_args,
+            stdout=sp.PIPE,
+            stderr=sp.STDOUT,
+            universal_newlines=True,
+            creationflags=sp.CREATE_NO_WINDOW,
         )
         trigger_time = 0
         for line in g_process.stdout:
