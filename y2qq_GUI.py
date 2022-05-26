@@ -9,18 +9,9 @@ from m3u8_cache import server
 # start a local server
 server.start_server()
 
-format_dic = {
-    "91": "144p",
-    "92": "240p",
-    "93": "360p",
-    "94": "480p",
-    "95": "720p",
-    "96": "1080p",
-    "300": "720p",
-    "301": "1080p",
-}
 format_list = []
-m3u8 = ""
+g_current_selected_format = 0
+g_current_m3u8_url = ""
 
 sg.theme("DarkAmber")
 # 设置控件属性
@@ -157,17 +148,23 @@ try:
                 # 每次更新时需要先清空,否则按多次时无限添加
                 format_list = []
                 formats = values[event]
-                for i in formats:
-                    format_list.append(format_dic[i["format_id"]])
+                format_list = [f"{f['height']}p" for f in formats]
                 # 调用字典转化为分辨率并更新到选择列表
                 window["-SELECTOR-"].update(values=format_list)
+
+                call_window_event_value_with_delay(window, "-SELECTOR-", format_list[-1])
             except:
                 pass
         elif event == "-SELECTOR-":
             # 通过列表选择器的输入提取对应的m3u8链接
+            g_current_selected_format = values["-SELECTOR-"]
             index = format_list.index(values["-SELECTOR-"])
-            m3u8 = formats[index]["url"]
-            sg.cprint(f"当前选择:{m3u8}")
+
+            # 选择对应Index，用于自动触发时
+            window["-SELECTOR-"].update(set_to_index=[index])
+
+            g_current_m3u8_url = formats[index]["url"]
+            sg.cprint(f"当前选择:{g_current_m3u8_url}")
         elif event == "开始直播":
             try:
                 btn_save_config_yaml(values, should_pop_up=False)
@@ -175,7 +172,7 @@ try:
                 # 开启新进程 用于持续打印推流情况
                 window.perform_long_operation(
                     lambda: y2qq.restream(
-                        m3u8,
+                        g_current_m3u8_url,
                         values["url"],
                         values["ff"],
                         values["live_server"],
