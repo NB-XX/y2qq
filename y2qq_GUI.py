@@ -261,4 +261,5 @@ except Exception as e:
     err_str = traceback.format_exc()
     sg.Popup(f"未处理异常:【{err_str}】")
 finally:
+    server.shutdown_server()
     window.close()

@@ -28,12 +28,23 @@ class LocalM3u8_Handler(http.server.BaseHTTPRequestHandler):
         return
 
 
+g_http_server = None
+
+
 def __start_server():
+    global g_http_server
     PORT = 10800
     Handler = LocalM3u8_Handler
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
+        g_http_server = httpd
         httpd.serve_forever()
 
 
 def start_server():
+    shutdown_server()
     threading.Thread(target=__start_server, daemon=True).start()
+
+
+def shutdown_server():
+    if g_http_server:
+        g_http_server.shutdown()
