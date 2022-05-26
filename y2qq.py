@@ -125,7 +125,7 @@ def restream(m3u8, video_url, selected_format, in_ffmpeg, in_server_url, in_key)
         import traceback
 
         err_str = traceback.format_exc()
-        print(err_str)
+        sg.cprint(err_str)
         sg.cprint("推流失败")
         stop_restream()
 
