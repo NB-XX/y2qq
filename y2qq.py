@@ -196,7 +196,7 @@ def check_live(url):
         sg.cprint(f"{now_time} 还没有开播")
         time.sleep(15)
         check_result = isLiveNow(url)
-    sg.cprint("直播开始了")
+    sg.cprint("直播开始了，开始自动推流最高画质")
 
 
 def check_update_info():

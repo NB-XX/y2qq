@@ -15,6 +15,8 @@ g_current_m3u8_url = ""
 
 sg.theme("DarkAmber")
 # 设置控件属性
+update_button = sg.Button("更新版本", key="check_update", size=10)
+auto_live_check = sg.Button("挂机模式", key="-isLiveNow-")
 ff_text = sg.Text("设置ffmpeg路径")
 ff_input = sg.Input("", key="ff", size=4)
 port_text = sg.Text("输入代理端口")
@@ -41,7 +43,6 @@ output_Ml = sg.Multiline(
 )
 start_button = sg.Button("开始直播", size=14)
 stop_button = sg.Button("停止推流", visible=False, size=14)
-auto_live_check = sg.Button("挂机模式", key="-isLiveNow-")
 format_list_text = sg.Text("选择分辨率")
 format_list_selector = sg.Combo(
     format_list, key="-SELECTOR-", readonly=True, enable_events=True, size=20
@@ -49,7 +50,7 @@ format_list_selector = sg.Combo(
 
 # 左侧布局
 left_col = [
-    [sg.Button("更新版本", key="check_update", size=10)],
+    [update_button,auto_live_check],
     [ff_text, ff_input, sg.FileBrowse("选择ffmpeg.exe")],
     [port_text, port_input, port_button],
     [save_button, read_button],
@@ -149,7 +150,6 @@ try:
                 format_list = []
                 formats = values[event]
                 format_list = [f"{f['height']}p" for f in formats]
-                # 调用字典转化为分辨率并更新到选择列表
                 window["-SELECTOR-"].update(values=format_list)
 
                 call_window_event_value_with_delay(window, "-SELECTOR-", format_list[-1])
@@ -191,7 +191,10 @@ try:
                 lambda: y2qq.check_live(values["url"]), "-check-"
             )
         elif event == "-check-":
-            pass
+             window.write_event_value('获取直播信息','** DONE **')
+             g_current_m3u8_url = formats[-1]['url']
+             print(g_current_m3u8_url)
+             window.write_event_value('开始直播','** DONE **')
         elif event == "停止推流":
             y2qq.stop_restream()
             sg.cprint("推流已经停止")
