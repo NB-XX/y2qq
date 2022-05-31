@@ -41,7 +41,7 @@ def get_format(in_url):
             result = ydl.extract_info(f"{url}", download=False)
         if result["is_live"]:
             sg.cprint("获取直播信息成功")
-            return result["formats"]
+            return result
         else:
             sg.cprint("获取直播信息失败，直播可能已经停止")
     except:
@@ -64,13 +64,12 @@ def __refresh_remote_m3u8(video_id, video_url, select_format="480p"):
     m3u8_cache.setup_m3u8_src(video_id, result_url)
 
 
-def restream(m3u8, video_url, selected_format, in_ffmpeg, in_server_url, in_key):
+def restream(m3u8, video_id, selected_format, in_ffmpeg, in_server_url, in_key):
     global g_process
     stop_restream()
 
     # 取代远端 m3u8, 本地读取 m3u8 合并多个Seq
-    video_id = video_url.split("v=")[1].strip()
-
+    video_id = video_id
     m3u8_cache.setup_m3u8_src(video_id, m3u8)
     local_m3u8_url = m3u8_cache.server_produce_m3u8(video_id, m3u8)
     sg.cprint(f"本地 m3u8 url:\n{local_m3u8_url}")
@@ -78,7 +77,8 @@ def restream(m3u8, video_url, selected_format, in_ffmpeg, in_server_url, in_key)
     using_m3u8 = local_m3u8_url
 
     ffmpeg_path = in_ffmpeg
-    server_url = in_server_url if in_server_url.endswith("/") else in_server_url + "/"
+    server_url = in_server_url if in_server_url.endswith(
+        "/") else in_server_url + "/"
     key = in_key
 
     # FFMPEG 命令
@@ -115,16 +115,17 @@ def restream(m3u8, video_url, selected_format, in_ffmpeg, in_server_url, in_key)
                     if float(speed) < 0.8:
                         trigger_time += 1
                         if trigger_time > 3:
-                            __refresh_remote_m3u8(video_id, video_url, selected_format)
+                            __refresh_remote_m3u8(
+                                video_id, video_url, selected_format)
                             trigger_time = 0
                 except Exception as e:
                     pass
             elif "Error " in line:
                 sg.cprint(line.rstrip("\n"))
                 print(line)
-                
+
         # for out putting the end of process
-        raise Exception
+        stop_restream()
     except Exception as e:
         import traceback
 
@@ -200,7 +201,8 @@ def check_live(url):
 
 
 def check_update_info():
-    response = requests.get("https://api.github.com/repos/NB-XX/y2qq/releases/latest")
+    response = requests.get(
+        "https://api.github.com/repos/NB-XX/y2qq/releases/latest")
     info_dict = response.json()
     return info_dict
 
@@ -237,7 +239,8 @@ def check_update(window: sg.Window):
 
 
 def update_exe(assets, window: sg.Window):
-    thread = threading.Thread(target=__update_exe, args=(assets, window), daemon=True)
+    thread = threading.Thread(
+        target=__update_exe, args=(assets, window), daemon=True)
     thread.start()
 
 

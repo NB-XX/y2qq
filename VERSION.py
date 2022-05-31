@@ -1,1 +1,1 @@
-EXE_VERSION = "2.2.0"
+EXE_VERSION = "2.2.1"

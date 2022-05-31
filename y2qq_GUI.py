@@ -1,5 +1,5 @@
 import threading
-
+import time
 import PySimpleGUI as sg
 
 import y2qq
@@ -47,20 +47,22 @@ format_list_text = sg.Text("选择分辨率")
 format_list_selector = sg.Combo(
     format_list, key="-SELECTOR-", readonly=True, enable_events=True, size=20
 )
-
+tilte_text = sg.Text('', key='-title-')
+main_tab = [[url_text, url_input, m3u8_button],
+            [live_server_text, live_server_input],
+            [format_list_text, format_list_selector],
+            [start_button, stop_button]]
+setting_tab = [[update_button, auto_live_check],
+               [key_text, key_input],
+               [ff_text, ff_input, sg.FileBrowse("选择ffmpeg.exe")],
+               [port_text, port_input, port_button],
+               [save_button, read_button]]
 # 左侧布局
-left_col = [
-    [update_button,auto_live_check],
-    [ff_text, ff_input, sg.FileBrowse("选择ffmpeg.exe")],
-    [port_text, port_input, port_button],
-    [save_button, read_button],
-    [url_text, url_input, m3u8_button],
-    [live_server_text, live_server_input],
-    [key_text, key_input],
-    [format_list_text, format_list_selector],
-    [start_button, stop_button],
-]
-layout = [[sg.Column(left_col), output_Ml]]
+
+layout = [[sg.TabGroup([[sg.Tab('主页', main_tab),
+                         sg.Tab('设置', setting_tab)]], key='-group1-', tab_location='right')],
+          [output_Ml]
+          ]
 
 
 # ---temp function. Maybe move to outer file for better constuct
@@ -148,11 +150,13 @@ try:
             try:
                 # 每次更新时需要先清空,否则按多次时无限添加
                 format_list = []
-                formats = values[event]
+                formats_raw = values[event]
+                formats = formats_raw["formats"]
                 format_list = [f"{f['height']}p" for f in formats]
                 window["-SELECTOR-"].update(values=format_list)
 
-                call_window_event_value_with_delay(window, "-SELECTOR-", format_list[-1])
+                call_window_event_value_with_delay(
+                    window, "-SELECTOR-", format_list[-1])
             except:
                 pass
         elif event == "-SELECTOR-":
@@ -173,7 +177,7 @@ try:
                 window.perform_long_operation(
                     lambda: y2qq.restream(
                         g_current_m3u8_url,
-                        values["url"],
+                        formats_raw["id"],
                         g_current_selected_format,
                         values["ff"],
                         values["live_server"],
@@ -191,10 +195,25 @@ try:
                 lambda: y2qq.check_live(values["url"]), "-check-"
             )
         elif event == "-check-":
-             window.write_event_value('获取直播信息','** DONE **')
-             g_current_m3u8_url = formats[-1]['url']
-             print(g_current_m3u8_url)
-             window.write_event_value('开始直播','** DONE **')
+            window.write_event_value('获取直播信息', '** DONE **')
+
+            is_auto_live_OK = False
+            tmp_retry_times = 0
+            while True:
+                if g_current_m3u8_url:
+                    window.write_event_value('获取直播信息', '** DONE **')
+                    call_window_event_value_with_delay(
+                        window, "开始直播", g_current_m3u8_url, delay=1)
+                    is_auto_live_OK = True
+                    break
+                else:
+                    if tmp_retry_times > 10:
+                        is_auto_live_OK = False
+                        break
+                    tmp_retry_times += 1
+                    time.sleep(1)
+            if is_auto_live_OK == False:
+                sg.popup("自动开播失败, 请检测网络")
         elif event == "停止推流":
             y2qq.stop_restream()
             sg.cprint("推流已经停止")

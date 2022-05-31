@@ -1,0 +1,525 @@
+[33mcommit cdd3465cea8639f3e6226e7c8d9fe743171ed230[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sun May 29 00:11:57 2022 +0800
+
+    修复了挂机模式不显示停止直播按钮的错误；修改了video id的获取方式，增强不同链接的容错性。
+
+[33mcommit c45960b847c7694ef4f66c570fdba96616b00a80[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sun May 29 00:10:48 2022 +0800
+
+    修复了挂机模式不显示关闭按钮的错误；修改了video id的获取方式增强链接容错。
+
+[33mcommit 358fab305737ee3c4a73869973e590b263859ecc[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 27 01:13:18 2022 +0800
+
+    main
+
+[33mcommit ddde1f72449d607c19c7e882a24b510be1b32250[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Fri May 27 00:12:46 2022 +0800
+
+    Update y2qq.py
+    
+    只当进程退出时才发起错误调用输出
+
+[33mcommit 6177685d1fec4f20c42f03c7db8d019d050fc5d1[m[33m ([m[1;32mNBXX[m[33m)[m
+Merge: a28c62c 07089b0
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 22:01:48 2022 +0800
+
+    Merge pull request #9 from HalfMAI/main
+    
+    add creationflags=sp.CREATE_NO_WINDOW
+
+[33mcommit 07089b05966455e7e268294bdd819d69ad95cbda[m
+Merge: b249974 a28c62c
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 21:50:25 2022 +0800
+
+    Merge branch 'NB-XX:main' into main
+
+[33mcommit b249974fff1bb2db5d664e92e63fb96f5a4d10d2[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 21:48:46 2022 +0800
+
+    add creationflags=sp.CREATE_NO_WINDOW
+
+[33mcommit a28c62cab81a86d25bd95c41bdf99ac10f41df77[m
+Merge: 31b38eb 190f67f
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Thu May 26 20:21:12 2022 +0800
+
+    Merge pull request #8 from HalfMAI/main
+    
+    优化更新
+
+[33mcommit 190f67fad7e11b2da9ef68d1fe36b0c4ef716240[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 19:53:14 2022 +0800
+
+    Update package_exe.yml
+    
+    set fix version
+
+[33mcommit 806aac5316817cf10d219e1cbafc2d6f5722a7d2[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 19:35:45 2022 +0800
+
+    add traceback
+
+[33mcommit 4f2da8b41cf88131e1daf8d27c9489f633e1ef5d[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 18:49:15 2022 +0800
+
+    添加当速度过慢时，尝试重新更新远端m3u8地址
+
+[33mcommit 6b8ef321ae73780df69d1c635690aad2becadc07[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 18:15:56 2022 +0800
+
+    格式化FFMPEG 命令
+
+[33mcommit f3360307612558a3e61abfdb9108119ea90283f7[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 18:11:40 2022 +0800
+
+    优化分辨率的自动选择
+
+[33mcommit 8bf13b9b1e950d76a0ae6c7359ba1f47bac9f95d[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 18:11:07 2022 +0800
+
+    取消在ffmpeg请求时同时更新远端m3u8
+
+[33mcommit 6cb77a9d604be8541fbbb9e79360d1c3e044cdec[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 17:00:31 2022 +0800
+
+    fix version compare using wrong type
+
+[33mcommit 0918c8947a5c2cd87bf637619500e4e49a330646[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 15:59:48 2022 +0800
+
+    add live_server input
+    opt code struct
+
+[33mcommit 05ffc315d118ae3a44949fef352e1cbf88f1cfd1[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 15:53:15 2022 +0800
+
+    add server clean up
+
+[33mcommit 31b38ebffa8b28ac7aad9d62edcd7deb0e6cfeca[m
+Merge: f589dad 9868b08
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Thu May 26 09:23:41 2022 +0800
+
+    Merge pull request #7 from HalfMAI/main
+    
+    修复错误
+
+[33mcommit 9868b0825e8df08fb15d24c18339759aa17291d6[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 02:05:18 2022 +0800
+
+    fix m3u8 cache cliping #EXT-X-DISCONTINUITY which will get wrong result of sequence
+
+[33mcommit dba6b213421cd188df593ce885825e7cc9414c06[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Thu May 26 00:44:49 2022 +0800
+
+    add stop restream before streaming
+    add -re to fix the player speed
+
+[33mcommit f589dade1f5e371f4d1dd3b2b4e1ce74450ff020[m
+Merge: 823dcbc e426c4c
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Wed May 25 19:07:06 2022 +0800
+
+    Merge pull request #6 from HalfMAI/main
+    
+    添加 自更新功能
+
+[33mcommit e426c4c714ee1e1699ae697ab4b2eda6ba490bd5[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 18:53:43 2022 +0800
+
+    Update package_exe.yml
+
+[33mcommit 3ccae97a448dfd140ab38f5812977169ac5acd86[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 18:43:53 2022 +0800
+
+    add update from github
+    should care the EXE_VERSION as the version compare value
+
+[33mcommit 4bbc8deaf3997edd40b3e6c2a440410f71f1ff5a[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 18:30:10 2022 +0800
+
+    add updater for update exe
+
+[33mcommit ffc18a261f8ee8a9c06aef23abb206ea90c8f26c[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 18:29:48 2022 +0800
+
+    add package updater action
+
+[33mcommit 823dcbce6251e9f489fc9e2d4a4fa62d98b19f82[m
+Merge: a36f56d 28e3055
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Wed May 25 17:16:35 2022 +0800
+
+    Merge pull request #5 from HalfMAI/main
+    
+    优化本地m3u8服务与bug修复
+
+[33mcommit 28e305508337be4cb06457617678d1ecf8a82605[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 16:07:14 2022 +0800
+
+    Update package_exe.yml
+
+[33mcommit adc7499b02af91552d30b0fa55931dd4ee1e1e70[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 15:51:29 2022 +0800
+
+    Update package_exe.yml
+
+[33mcommit 52a043e7386c043b2a67e0118986b486419506dc[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 15:40:43 2022 +0800
+
+    Update package_exe.yml
+
+[33mcommit 165e18fe137ee3c185a26f5f41ee9bde2e8b81d8[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 15:36:09 2022 +0800
+
+    Update package_exe.yml
+
+[33mcommit 86484ee96aa22ac69eab1a687421002cecea5f8e[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 15:28:23 2022 +0800
+
+    Create package_exe.yml
+
+[33mcommit 4f0b6b8a5429676df75948f6b40d9ac65441a92e[m
+Merge: b8ab1df a36f56d
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 14:40:13 2022 +0800
+
+    Merge branch 'NB-XX:main' into main
+
+[33mcommit b8ab1dfaee8718f9612d6213b0a414864704815f[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 13:12:07 2022 +0800
+
+    add requirements.txt
+    add package flow description on README.md
+
+[33mcommit 0bce832bfd761d3612bccba504a072c814e5d026[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 11:58:50 2022 +0800
+
+    add async requesting remote m3u8
+    add clipping #EXT-X-DISCONTINUITY at the head from local m3u8
+
+[33mcommit a36f56dadb51717d5124997706be6bb667f5e149[m
+Merge: 1132cd9 4cefd07
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Wed May 25 01:58:27 2022 +0800
+
+    Merge pull request #4 from HalfMAI/main
+    
+    handle error while seq[0] is EXT-X-DISCONTINUITY
+
+[33mcommit 4cefd07fbf3a7f5f6b48145d8c26c1b68b478b50[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Wed May 25 01:32:21 2022 +0800
+
+    handle error while seq[0] is EXT-X-DISCONTINUITY
+    add error trace
+    change the m3u8 update by requset
+
+[33mcommit 1132cd939568bc88a8ce5ec516c19dcaf64a7794[m
+Merge: 746e208 9230847
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Tue May 24 20:54:25 2022 +0800
+
+    Merge pull request #3 from HalfMAI/main
+    
+    添加本地m3u8服务
+
+[33mcommit 9230847ca6d9dbb1bd6ad7a94de52fd1bb938b67[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Tue May 24 18:42:40 2022 +0800
+
+    Update y2qq_GUI.py
+    
+    merge y2qq_gui
+
+[33mcommit 723d1b0a115268dc79f5f1663d38ac47aece45e8[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Tue May 24 18:28:43 2022 +0800
+
+    merge upstream
+    add local m3u8 server
+    add local m3u8 service
+    default using local m3u8 url
+
+[33mcommit 2cb10e73cba5b99cb8ed8f9b815bd5e5142f6742[m
+Merge: 94f1d93 746e208
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Tue May 24 18:25:22 2022 +0800
+
+    Merge branch 'main' of https://github.com/HalfMAI/y2qq
+
+[33mcommit 94f1d933409df2c0f4872b0d47ffe16f045df994[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Tue May 24 15:51:01 2022 +0800
+
+    add local m3u8 server
+
+[33mcommit 746e2083adb9494094f44938c7fd54dcfe87002e[m[33m ([m[1;33mtag: v2.1.1[m[33m)[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Tue May 24 15:21:33 2022 +0800
+
+    添加“挂机模式”控件
+
+[33mcommit c790f384ecf081e30b4c9bd500871483522fa31f[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Tue May 24 15:19:37 2022 +0800
+
+    添加开播检测功能
+    
+    isLiveNow()提取三个参数：
+    1、isUpcoming 是否即将开播
+    2、scheduledStartTime 预设开播时间
+    3、isLiveNow 是否正在直播
+    check_live()检查直播进行状态，若未开播sleep到预设时间，开启15秒一次的检测
+
+[33mcommit e87f2bc61dffecc3637e3c31ce6aaf4a563c5dc7[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Tue May 24 15:14:48 2022 +0800
+
+    add memory cache m3u8 as default
+
+[33mcommit e08ba2a3882e66b34481835a9a1cf366e8c87288[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Tue May 24 13:52:20 2022 +0800
+
+    add m3u8 cache test
+
+[33mcommit d9d09503a5b2a740a34e96bbde10c587127c9431[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Tue May 24 02:09:58 2022 +0800
+
+    修复清晰度选择更新失败的bug
+    
+    使用format_id优化字典长度；
+    补充了95、95两种清晰度。
+
+[33mcommit a05bfc4b38382cb40acac276b01f953c2681402c[m
+Merge: bd23890 613315e
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Mon May 23 20:36:39 2022 +0800
+
+    Merge pull request #2 from HalfMAI/main
+    
+    修复一些常见bug, 优化常用操作体验
+
+[33mcommit 613315e200095f3e6af5247cff644576625ed6be[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Mon May 23 18:50:09 2022 +0800
+
+    add saving last ytb_url and key
+    add loading config after restart for better UX
+
+[33mcommit 86993bb0b2764f7e88e99fcee4395699d7b2b99f[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Mon May 23 18:12:07 2022 +0800
+
+    add network testing after set port
+
+[33mcommit ed41ff55943c12a69143a83e19657f703702f99f[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Mon May 23 18:00:11 2022 +0800
+
+    delete empty row for better format
+
+[33mcommit d3c9f1a7a356f06f04636fcb6d5cf469a0b87776[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Mon May 23 17:48:42 2022 +0800
+
+    fix format_list not clear while new value came
+
+[33mcommit bb7af7fd3ef09d5305de5db439e86a163188e798[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Mon May 23 17:47:10 2022 +0800
+
+    fix error while port input is not number
+
+[33mcommit 0796bab606bbf3b0b95e07c4a1ebac554815481b[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Mon May 23 17:46:39 2022 +0800
+
+    add auto load yaml when window finalized
+
+[33mcommit addc8c9a05ee94204f04443b1b8a82b4a61ed73e[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Mon May 23 17:43:08 2022 +0800
+
+    Update .gitignore
+
+[33mcommit bd23890d9a9e33c7bfc284dcbfacbc7dd0a2d98e[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Mon May 23 01:03:02 2022 +0800
+
+    Add files via upload
+
+[33mcommit 96b79760e8ae7b11b4ec2c7b120d8bf557e32b6e[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Mon May 23 01:02:49 2022 +0800
+
+    Delete example2.gif
+
+[33mcommit 2359f125982ed20f29a0e1b1ee94e3a0d9b8e1e8[m[33m ([m[1;33mtag: v2.1.0[m[33m)[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Mon May 23 00:52:32 2022 +0800
+
+    Update y2qq.py
+
+[33mcommit 572da6f44ac53d6b17361e88ce4922a5edb6c1d6[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Mon May 23 00:52:08 2022 +0800
+
+    Update y2qq_GUI.py
+
+[33mcommit ddad4afe37234bca0dcd1eddf1464030012d9249[m
+Merge: c4fd0b3 8d51b41
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sat May 21 04:44:08 2022 +0800
+
+    Merge pull request #1 from HalfMAI/main
+    
+    添加简单异常处理
+
+[33mcommit 8d51b416bdc3003337f3e72bda4360e7356578ae[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Fri May 20 15:44:44 2022 +0800
+
+    add error traceback for better debugging
+
+[33mcommit f993f6189a87f6089c3cf282f0f6c3091edbd1ca[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Fri May 20 15:38:04 2022 +0800
+
+    fix error while process is None
+    add global process init
+    rename process to g_process
+
+[33mcommit bea34c82b9a77c5cd8bb11dc7853d196764576a4[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Fri May 20 15:36:14 2022 +0800
+
+    add Excetion Handling
+
+[33mcommit 2d6eabc87c0184ac3c9de7e712b3a042e6b19de3[m
+Author: HalfMAI <halfloligo.h@gmail.com>
+Date:   Fri May 20 15:13:33 2022 +0800
+
+    Create .gitignore
+
+[33mcommit c4fd0b36d1732f7dd658e0000506759124a774fa[m[33m ([m[1;33mtag: v2.0.0[m[33m)[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 20 13:37:35 2022 +0800
+
+    Update README.md
+
+[33mcommit e26335110d0de52eaab76872254cec14b98a3f60[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 20 13:28:58 2022 +0800
+
+    Delete new
+
+[33mcommit 5932f55c2e5a5bc2f7a6963574c748c938c412ef[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 20 13:28:31 2022 +0800
+
+    Add files via upload
+
+[33mcommit c4f7ee468c632b58fa289ce730cea3b5c85d14bc[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 20 13:27:26 2022 +0800
+
+    Create new
+
+[33mcommit f95ca5639d16ceb7949e36a98a6b392903ac9896[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 20 13:20:51 2022 +0800
+
+    Update y2qq_GUI.py
+
+[33mcommit 549778fe66a08169372c3afe4a5f325fdf5aa467[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 20 02:33:45 2022 +0800
+
+    Update y2qq_GUI.py
+
+[33mcommit fe85ea6384df7c7c3b5353c4ee7c97b862653d68[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Fri May 20 02:33:18 2022 +0800
+
+    Update y2qq.py
+
+[33mcommit 38e771d82330723204eb11ed281a3abfd950f5ac[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Thu May 19 01:33:43 2022 +0800
+
+    Update y2qq_GUI.py
+
+[33mcommit 8702183026b3dc84ab5defc83a8875e20e1e82de[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Thu May 19 01:33:14 2022 +0800
+
+    Update y2qq.py
+
+[33mcommit 16538b67f4e806e8d46dd86891db60b677cd0094[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sun May 15 17:18:56 2022 +0800
+
+    Update and rename win_y2qq.py to y2qq.py
+
+[33mcommit 413b971169ec688acde8053993b8117e7d12519f[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sun May 15 17:18:29 2022 +0800
+
+    Add files via upload
+
+[33mcommit 5c2bae71641682158f6754e72bb11e3ebf40a026[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sat May 7 22:08:39 2022 +0800
+
+    Update README.md
+
+[33mcommit d2f0e7466c66d21e3471a668e906c4b17f4f6adb[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sat May 7 22:06:40 2022 +0800
+
+    Update README.md
+
+[33mcommit 1c02729b138b2cd38d29a6dc765d26809904556d[m[33m ([m[1;33mtag: v1.0.0[m[33m)[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sat May 7 21:50:34 2022 +0800
+
+    Create README.md
+
+[33mcommit e4f56f2985166220e1db7e7381462a94e5e8b9a1[m
+Author: NB-XX <53631369+NB-XX@users.noreply.github.com>
+Date:   Sat May 7 21:49:48 2022 +0800
+
+    Add files via upload
