@@ -77,8 +77,7 @@ def restream(m3u8, video_id, selected_format, in_ffmpeg, in_server_url, in_key):
     using_m3u8 = local_m3u8_url
 
     ffmpeg_path = in_ffmpeg
-    server_url = in_server_url if in_server_url.endswith(
-        "/") else in_server_url + "/"
+    server_url = in_server_url if in_server_url.endswith("/") else in_server_url + "/"
     key = in_key
 
     # FFMPEG 命令
@@ -102,7 +101,7 @@ def restream(m3u8, video_id, selected_format, in_ffmpeg, in_server_url, in_key):
             stdout=sp.PIPE,
             stderr=sp.STDOUT,
             universal_newlines=True,
-            creationflags=sp.CREATE_NO_WINDOW,
+            # creationflags=sp.CREATE_NO_WINDOW,
         )
         trigger_time = 0
         for line in g_process.stdout:
@@ -115,8 +114,7 @@ def restream(m3u8, video_id, selected_format, in_ffmpeg, in_server_url, in_key):
                     if float(speed) < 0.8:
                         trigger_time += 1
                         if trigger_time > 3:
-                            __refresh_remote_m3u8(
-                                video_id, video_url, selected_format)
+                            __refresh_remote_m3u8(video_id, video_url, selected_format)
                             trigger_time = 0
                 except Exception as e:
                     pass
@@ -201,8 +199,7 @@ def check_live(url):
 
 
 def check_update_info():
-    response = requests.get(
-        "https://api.github.com/repos/NB-XX/y2qq/releases/latest")
+    response = requests.get("https://api.github.com/repos/NB-XX/y2qq/releases/latest")
     info_dict = response.json()
     return info_dict
 
@@ -239,8 +236,7 @@ def check_update(window: sg.Window):
 
 
 def update_exe(assets, window: sg.Window):
-    thread = threading.Thread(
-        target=__update_exe, args=(assets, window), daemon=True)
+    thread = threading.Thread(target=__update_exe, args=(assets, window), daemon=True)
     thread.start()
 
 

@@ -136,6 +136,12 @@ def windows_init(window: sg.Window):
     call_window_event_value_with_delay(window, "获取直播信息")
 
 
+def wrap(string):
+    cut_result = [string[i : i + 35] for i in range(0, len(string), 35)]
+    result = "\n".join(cut_result)
+    return result
+
+
 # ---windows init and event loop
 try:
     window = sg.Window("QQ频道转播", layout, finalize=True)
@@ -170,7 +176,8 @@ try:
                 call_window_event_value_with_delay(
                     window, "-SELECTOR-", format_list[-1]
                 )
-                window["-title-"].update(formats_raw["title"][:-17])
+                title = wrap(formats_raw["title"][:-17])
+                window["-title-"].update(title)
             except:
                 pass
         elif event == "-SELECTOR-":
