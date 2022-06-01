@@ -47,22 +47,34 @@ format_list_text = sg.Text("选择分辨率")
 format_list_selector = sg.Combo(
     format_list, key="-SELECTOR-", readonly=True, enable_events=True, size=20
 )
-tilte_text = sg.Text('', key='-title-')
-main_tab = [[url_text, url_input, m3u8_button],
-            [live_server_text, live_server_input],
-            [format_list_text, format_list_selector],
-            [start_button, stop_button]]
-setting_tab = [[update_button, auto_live_check],
-               [key_text, key_input],
-               [ff_text, ff_input, sg.FileBrowse("选择ffmpeg.exe")],
-               [port_text, port_input, port_button],
-               [save_button, read_button]]
+tilte_text = sg.Text("", key="-title-")
+main_tab = [
+    [url_text, url_input, m3u8_button],
+    [format_list_text, format_list_selector],
+    [start_button, stop_button],
+    [auto_live_check],
+    [tilte_text],
+]
+setting_tab = [
+    [update_button],
+    [ff_text, ff_input, sg.FileBrowse("选择ffmpeg.exe")],
+    [port_text, port_input, port_button],
+    [live_server_text, live_server_input],
+    [key_text, key_input],
+    [save_button, read_button],
+]
 # 左侧布局
 
-layout = [[sg.TabGroup([[sg.Tab('主页', main_tab),
-                         sg.Tab('设置', setting_tab)]], key='-group1-', tab_location='right')],
-          [output_Ml]
-          ]
+layout = [
+    [
+        sg.TabGroup(
+            [[sg.Tab("主页", main_tab), sg.Tab("设置", setting_tab)]],
+            key="-group1-",
+            tab_location="right",
+        )
+    ],
+    [output_Ml],
+]
 
 
 # ---temp function. Maybe move to outer file for better constuct
@@ -156,7 +168,9 @@ try:
                 window["-SELECTOR-"].update(values=format_list)
 
                 call_window_event_value_with_delay(
-                    window, "-SELECTOR-", format_list[-1])
+                    window, "-SELECTOR-", format_list[-1]
+                )
+                window["-title-"].update(formats_raw["title"][:-17])
             except:
                 pass
         elif event == "-SELECTOR-":
@@ -168,7 +182,7 @@ try:
             window["-SELECTOR-"].update(set_to_index=[index])
 
             g_current_m3u8_url = formats[index]["url"]
-            sg.cprint(f"当前选择:{g_current_m3u8_url}")
+            sg.cprint(f"当前选择:{g_current_selected_format}")
         elif event == "开始直播":
             try:
                 btn_save_config_yaml(values, should_pop_up=False)
@@ -195,15 +209,16 @@ try:
                 lambda: y2qq.check_live(values["url"]), "-check-"
             )
         elif event == "-check-":
-            window.write_event_value('获取直播信息', '** DONE **')
+            window.write_event_value("获取直播信息", "** DONE **")
 
             is_auto_live_OK = False
             tmp_retry_times = 0
             while True:
                 if g_current_m3u8_url:
-                    window.write_event_value('获取直播信息', '** DONE **')
+                    window.write_event_value("获取直播信息", "** DONE **")
                     call_window_event_value_with_delay(
-                        window, "开始直播", g_current_m3u8_url, delay=1)
+                        window, "开始直播", g_current_m3u8_url, delay=1
+                    )
                     is_auto_live_OK = True
                     break
                 else:
