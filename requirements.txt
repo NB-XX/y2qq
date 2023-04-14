@@ -1,6 +1,6 @@
 pyinstaller
 PySimpleGUI
 requests
-youtube_dl
+yt_dlp
 beautifulsoup4
 PyYAML
