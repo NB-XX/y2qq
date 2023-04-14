@@ -1,7 +1,7 @@
 import os
 import PySimpleGUI as sg
 import subprocess as sp
-import youtube_dl
+import yt_dlp as youtube_dl
 import yaml
 import json
 import requests
